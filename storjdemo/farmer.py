@@ -51,34 +51,54 @@ ERROR = -1
 FINISHED = 99
 # Never be '.' if farmer.py and uploader.py run simultaneously.
 DOWNLOAD_PATH = './download/'
-
 telehash = None
-
 status = 0
 
 def get_hash(f):
+    """
+    get a hash.
+    :param bytes f: byte data to be hashed
+    :return: hash
+    """
     m = hashlib.sha256()
     m.update(f)
     sha = m.digest()
     return sha
 
 class FarmerHandler(ChannelHandler):
+    """
+    class for openining and handlinkg farming channel of uploader
+    for farming.
+    """
     def __init__(self):
+        """
+        init
+        """
         ChannelHandler.__init__(self)
         self.file_info = {}
                 
     def seqAA_request(self, packet):
+        """
+        request a file. send a telehash location.
+        :param str packet: recieved packet, None due to opening.
+        :return: telehash location
+        """
         global telehash
         logging.info("requesting a file...")
         rpacket = {}
-        self.utp = Storjutp()
         rpacket['telehash_location'] = telehash.get_my_location()
-        loc = json.loads(telehash.get_my_location())
-        rpacket['utp_ip'] = loc['paths'][0]['ip']
-        rpacket['utp_port'] = self.utp.get_serverport()
         return json.dumps(rpacket)
 
     def seqAB_accept_file(self, packet):
+        """
+        accept a file information.
+        register file hash, tag hash for heartbeat, and send acceptable 
+        utp ip address and port number, and start downloading.
+        :param str packet: recieved packet, including hash of file and 
+                           hash of heartbeat tag.
+        :return: json str, including utp ip address and
+                  utp port. 
+        """
         logging.info("accepting file hashes...")
         rpacket = {}
         
@@ -86,17 +106,26 @@ class FarmerHandler(ChannelHandler):
         self.file_finished = 0
         self.file_hash = binascii.unhexlify(p['file_hash'])
         self.tag_hash = binascii.unhexlify(p['tag_hash'])
-        self.public_beat = Swizzle.Swizzle.fromdict(p['public_beat'])
         logging.info('accepting file %s and tag_hash %s'
                       % (self.file_hash ,self.tag_hash))
+        self.utp = Storjutp()
         self.utp.regist_hash(self.file_hash, self.handler, DOWNLOAD_PATH)
         self.utp.regist_hash(self.tag_hash, self.handler, DOWNLOAD_PATH)
-        return '{"success":1}'
+        loc = json.loads(telehash.get_my_location())
+        rpacket['utp_ip'] = loc['paths'][0]['ip']
+        rpacket['utp_port'] = self.utp.get_serverport()
+        return json.dumps(rpacket)
 
     def seqAC_report_downloaded(self, packet):
+        """
+        wait finishing it and report of finishing it.
+        :param str packet: recieved packet, including public beat 
+        :return: json str, only including success or not
+        """
         logging.info("reoprt that downloaded a file...")
         rpacket = {}
         p = json.loads(packet)
+        public_beat = Swizzle.Swizzle.fromdict(p['public_beat'])
         while self.file_finished != FINISHED and\
                    self.file_finished != ERROR:
             time.sleep(1)
@@ -104,7 +133,7 @@ class FarmerHandler(ChannelHandler):
         self.utp.stop_hash(self.file_hash)
         self.utp.stop_hash(self.tag_hash)
         if self.file_finished == FINISHED:
-            self.file_info['public_beat']  = self.public_beat
+            self.file_info['public_beat']  = public_beat
             self.file_info['tag']  = DOWNLOAD_PATH +\
                 binascii.hexlify(self.tag_hash).decode().upper()
             self.file_info['file']  =  DOWNLOAD_PATH +\
@@ -113,6 +142,12 @@ class FarmerHandler(ChannelHandler):
         return '{"success":0}'
 
     def handler(self, hash, error):
+        """
+        handler when finishng downloading.
+        check a file hash is same as one informed from uploader.
+        :param byte hash: file hash that was finished downloading.
+        :param str err: error info , None if no error.
+        """
         if error is not None:
             logging.error("downloaded failed..." + error)
         else:
@@ -130,17 +165,33 @@ class FarmerHandler(ChannelHandler):
             self.file_finished = FINISHED
 
     def factory(self):
+        """
+        factory for accepting a heart beat channel.
+        """
         if self.file_info != {}:
             return FarmerHeartbeatHandler(self.file_info)
         return None
 
 class FarmerHeartbeatHandler(ChannelHandler):
+    """
+    class for accepting heartbeat channel.
+    """
     def __init__(self, file_info):
+        """
+        init
+        """
         ChannelHandler.__init__(self)
         self.file_info = file_info
         pass
 
     def seqAA_make_proof(self, packet):
+        """
+        make a proof.
+        accept chanlleng, make a tag from the downloaded file, and make
+        a proof.
+        :param str packet: received json str, including challenge.
+        :return: return json str, including proof
+        """
         logging.info("making proof...")
         rpacket = {}
         p = json.loads(packet)
@@ -154,6 +205,11 @@ class FarmerHeartbeatHandler(ChannelHandler):
         return json.dumps(rpacket)
 
     def seqAB_get_result(self, packet):
+        """
+        receive a verification result.
+        :param str packet: received json str, including verification result.
+        :return: None to close channel.
+        """
         logging.info("receiving result...")
         p = json.loads(packet)
         if not p['valid']:

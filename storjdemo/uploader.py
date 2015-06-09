@@ -49,18 +49,30 @@ logging.basicConfig(level=logging.DEBUG, format=log_fmt)
 FILENAME = 'rand.dat'
 ERROR = -1
 FINISHED = 99
-
 beat = Swizzle.Swizzle()
 telehash = None
 status = 0
 
 def get_hash(f):
+    """
+    get a hash.
+    :param bytes f: byte data to be hashed
+    :return: hash
+    """
     m = hashlib.sha256()
     m.update(f)
     sha = m.digest()
     return sha
 
 def prepare_heartbeat(filename):
+    """
+    prepare heartbeat.
+    encode a file , save tag to a file named by tag hash,
+    and return state and a hash of tag.
+    :param str filename: heartbeat target filename 
+    :return: state and a hash of tag
+    """
+    global beat
     with open(filename, 'rb') as file:
         (tag_, state) = beat.encode(file)
     tag = base64.b64decode(tag_.todict())
@@ -71,40 +83,70 @@ def prepare_heartbeat(filename):
 
 
 class UploaderHandler(ChannelHandler):
+    """
+    class for handling farming channel for uploader
+    """
     def __init__(self):
+        """
+        init
+        """
         ChannelHandler.__init__(self)
         with open(FILENAME, 'rb') as f:
             self.file_hash = get_hash(f.read())
 
     def seqAA_accept_request(self, packet):
+        """
+        accept a file request.
+        send information about a hash of a file and a hearbeat tag,
+        and public beat.
+        :param str packet: received json packet, including 
+                           telehash location.
+        :return: sending json packet, including hash of file and heartbeat
+                  and tag to be sent.
+        """
         logging.info("accepting request a file...")
         rpacket = {}
         p = json.loads(packet)
         self.destination = p['telehash_location']
-        self.dest_utp_ip = p['utp_ip']
-        self.dest_utp_port = p['utp_port']
         rpacket['file_hash'] = \
             binascii.hexlify(self.file_hash).upper().decode()
         (self.state, self.tag_hash) =prepare_heartbeat(FILENAME)
         self.tag_hash_hex =\
             binascii.hexlify(self.tag_hash).upper().decode()
         rpacket['tag_hash'] = self.tag_hash_hex
-        rpacket['public_beat'] = beat.get_public().todict()
         logging.info('sending file %s and tag_hash %s'
                       % (rpacket['file_hash'] ,rpacket['tag_hash']))
         return json.dumps(rpacket)
 
     def seqAB_send_file(self, packet):
+        """
+        send a file.
+        send a file and a hearbeat tag,
+        :param str packet: received json packet, including 
+                          utp ip address and port number.
+        :return: sending json packet, including public heartbeat.
+        """
         logging.info("sending file...")
-        self.utp = Storjutp()
-        self.utp.send_file(self.dest_utp_ip, self.dest_utp_port, 
+        rpacket = {}
+        p = json.loads(packet)
+        dest_utp_ip = p['utp_ip']
+        dest_utp_port = p['utp_port']
+        utp = Storjutp()
+        utp.send_file(dest_utp_ip, dest_utp_port, 
                            self.tag_hash_hex, 
                            self.tag_hash, self.handler)
-        self.utp.send_file(self.dest_utp_ip, self.dest_utp_port, FILENAME,
+        utp.send_file(dest_utp_ip, dest_utp_port, FILENAME,
                            self.file_hash, self.handler)
-        return '{"success":1}'
+        rpacket['public_beat'] = beat.get_public().todict()
+        return json.dumps(rpacket)
         
     def seqAC_first_heartbeat(self, packet):
+        """
+        accept a file downloaded report and prepare a haertbeat in a thread.
+        :param str packet: received json packet, including 
+                           success flag..
+        :return: sending json packet, None to close the channel.
+        """
         logging.info("preparing heartbeat...")
         rpacket = {}
         p = json.loads(packet)
@@ -118,11 +160,20 @@ class UploaderHandler(ChannelHandler):
         return None
 
     def handler(self, hash, error):
+        """
+        handler for uTP. For now do nothing.
+        """
         pass
 
 
 class UploaderHeartbeatHandler(ChannelHandler):
+    """
+    class for sending heartbeat channel.
+    """
     def __init__(self, state, destination):
+        """
+        init
+        """
         ChannelHandler.__init__(self)
         self.state = state
         self.destination = destination
@@ -130,6 +181,12 @@ class UploaderHeartbeatHandler(ChannelHandler):
 
     @classmethod
     def schedule_heartbeat(cls, sl, state, destination):
+        """
+        schedule a heartbeat in a thread.
+        :param int s1: wait time before starting heartbeat.
+        :param object state: heartbeat state
+        :param str destination: telehash destination 
+        """
         global telehash
         logging.debug('starting heartbeat')
         time.sleep(sl)
@@ -137,12 +194,23 @@ class UploaderHeartbeatHandler(ChannelHandler):
             UploaderHeartbeatHandler(state, destination))
 
     def seqAA_send_challenge(self, packet):
+        """
+        make and send a challenge.
+        :param str packet: None
+        :return: sending json packet, including challenge of heartbeat.
+        """
         rpacket = {}
         self.cha = beat.gen_challenge(self.state)
         rpacket['challenge'] = self.cha.todict()
         return json.dumps(rpacket)
 
     def seqAB_verify(self, packet):
+        """
+        verify a proof.
+        :param str packet: received json packet, including 
+                           proof of heartbeat.
+        :return: sending json packet, including a result of verification.
+        """
         rpacket = {}
         p = json.loads(packet)
         proof = Swizzle.Swizzle.proof_type().fromdict(p['proof'])
