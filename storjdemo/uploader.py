@@ -36,6 +36,7 @@ import sys
 import time
 import hashlib
 import binascii
+import threading
 
 from heartbeat import Swizzle
 from storj.messaging import ChannelHandler
@@ -50,6 +51,7 @@ ERROR = -1
 FINISHED = 99
 
 beat = Swizzle.Swizzle()
+telehash = None
 status = 0
 
 def get_hash(f):
@@ -60,25 +62,19 @@ def get_hash(f):
 
 def prepare_heartbeat(filename):
     with open(filename, 'rb') as file:
-        (tag_, state_) = beat.encode(file)
-    state = state_.todict()
+        (tag_, state) = beat.encode(file)
     tag = base64.b64decode(tag_.todict())
     h = get_hash(tag)
     with open(binascii.hexlify(h).upper(), 'wb') as f:
         f.write(tag)
     return (state, h)
 
-def schedule_heartbeat(sl, state):
-    time.sleep(sl)
-    t.open_channel(self.destination, 'heartbeat', 
-    UploaderHeartbeatHandler(state))
 
 class UploaderHandler(ChannelHandler):
-    def __init__(self, t):
+    def __init__(self):
         ChannelHandler.__init__(self)
-        self.telehash = t
         with open(FILENAME, 'rb') as f:
-            self.hash = get_hash(f.read())
+            self.file_hash = get_hash(f.read())
 
     def seqAA_accept_request(self, packet):
         logging.info("accepting request a file...")
@@ -88,13 +84,14 @@ class UploaderHandler(ChannelHandler):
         self.dest_utp_ip = p['utp_ip']
         self.dest_utp_port = p['utp_port']
         rpacket['file_hash'] = \
-            binascii.hexlify(self.hash).upper().decode()
+            binascii.hexlify(self.file_hash).upper().decode()
         (self.state, self.tag_hash) =prepare_heartbeat(FILENAME)
         self.tag_hash_hex =\
             binascii.hexlify(self.tag_hash).upper().decode()
         rpacket['tag_hash'] = self.tag_hash_hex
+        rpacket['public_beat'] = beat.get_public().todict()
         logging.info('sending file %s and tag_hash %s'
-                      % (rpacket['tag_hash'] ,rpacket['file_hash']))
+                      % (rpacket['file_hash'] ,rpacket['tag_hash']))
         return json.dumps(rpacket)
 
     def seqAB_send_file(self, packet):
@@ -104,7 +101,7 @@ class UploaderHandler(ChannelHandler):
                            self.tag_hash_hex, 
                            self.tag_hash, self.handler)
         self.utp.send_file(self.dest_utp_ip, self.dest_utp_port, FILENAME,
-                           self.hash, self.handler)
+                           self.file_hash, self.handler)
         return '{"success":1}'
         
     def seqAC_first_heartbeat(self, packet):
@@ -112,8 +109,12 @@ class UploaderHandler(ChannelHandler):
         rpacket = {}
         p = json.loads(packet)
         if p['success'] :
-            threading.Thread(target = schedule_heartbeat,
-                             args = (0, self.state))
+            logging.info("threading heartbeat...")
+            t = threading.Thread(
+                target = UploaderHeartbeatHandler.schedule_heartbeat,
+                args = (1, self.state, self.destination))
+            t.start()
+            
         return None
 
     def handler(self, hash, error):
@@ -121,33 +122,46 @@ class UploaderHandler(ChannelHandler):
 
 
 class UploaderHeartbeatHandler(ChannelHandler):
-    def __init__(self, state):
+    def __init__(self, state, destination):
         ChannelHandler.__init__(self)
         self.state = state
+        self.destination = destination
         pass
 
+    @classmethod
+    def schedule_heartbeat(cls, sl, state, destination):
+        global telehash
+        logging.debug('starting heartbeat')
+        time.sleep(sl)
+        telehash.open_channel(destination, 'heartbeat', 
+            UploaderHeartbeatHandler(state, destination))
+
     def seqAA_send_challenge(self, packet):
-        rpakcet = {}
+        rpacket = {}
         self.cha = beat.gen_challenge(self.state)
         rpacket['challenge'] = self.cha.todict()
-        return json.dumps(rpakcet)
+        return json.dumps(rpacket)
 
     def seqAB_verify(self, packet):
-        rpakcet = {}
+        rpacket = {}
         p = json.loads(packet)
-        with open(fILENAME,'rb') as file:
-            rpakcet['valid'] = \
-                beat.verify(p['proof'], self.cha, self.state)
+        proof = Swizzle.Swizzle.proof_type().fromdict(p['proof'])
+        rpacket['valid'] = \
+            beat.verify(proof, self.cha, self.state)
         if rpacket['valid']:
-            threading.Thread(target = schedule_heartbeat,
-                             args = (30, self.state))
-        return json.dumps(rpakcet)
+            t = threading.Thread(
+                target = UploaderHeartbeatHandler.schedule_heartbeat,
+                args = (10, self.state, self.destination))
+            t.start()
+        return json.dumps(rpacket)
 
 def main(port):
-    t = StorjTelehash(port)
+    global telehash
+
+    telehash = StorjTelehash(port)
     logging.info('starting to listen a farming channel at ' +
-                  t.get_my_location())
-    t.add_channel_handler('farming', (lambda: UploaderHandler(t)))
+                  telehash.get_my_location())
+    telehash.add_channel_handler('farming', (lambda: UploaderHandler()))
 
     while status == 0:
         time.sleep(10);

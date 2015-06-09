@@ -47,14 +47,13 @@ from storjutp.storjutp import Storjutp
 log_fmt = '%(filename)s:%(lineno)d %(funcName)s() %(message)s'
 logging.basicConfig(level=logging.DEBUG, format=log_fmt)
 
-FILENAME = 'rand.dat'
 ERROR = -1
 FINISHED = 99
 # Never be '.' if farmer.py and uploader.py run simultaneously.
 DOWNLOAD_PATH = './download/'
 
+telehash = None
 
-beat = Swizzle.Swizzle()
 status = 0
 
 def get_hash(f):
@@ -64,17 +63,17 @@ def get_hash(f):
     return sha
 
 class FarmerHandler(ChannelHandler):
-    def __init__(self, telehash):
+    def __init__(self):
         ChannelHandler.__init__(self)
-        self.telehash = telehash
         self.file_info = {}
                 
     def seqAA_request(self, packet):
+        global telehash
         logging.info("requesting a file...")
         rpacket = {}
         self.utp = Storjutp()
-        rpacket['telehash_location'] = self.telehash.get_my_location()
-        loc = json.loads(self.telehash.get_my_location())
+        rpacket['telehash_location'] = telehash.get_my_location()
+        loc = json.loads(telehash.get_my_location())
         rpacket['utp_ip'] = loc['paths'][0]['ip']
         rpacket['utp_port'] = self.utp.get_serverport()
         return json.dumps(rpacket)
@@ -87,8 +86,9 @@ class FarmerHandler(ChannelHandler):
         self.file_finished = 0
         self.file_hash = binascii.unhexlify(p['file_hash'])
         self.tag_hash = binascii.unhexlify(p['tag_hash'])
+        self.public_beat = Swizzle.Swizzle.fromdict(p['public_beat'])
         logging.info('accepting file %s and tag_hash %s'
-                      % (self.tag_hash ,self.file_hash))
+                      % (self.file_hash ,self.tag_hash))
         self.utp.regist_hash(self.file_hash, self.handler, DOWNLOAD_PATH)
         self.utp.regist_hash(self.tag_hash, self.handler, DOWNLOAD_PATH)
         return '{"success":1}'
@@ -104,12 +104,13 @@ class FarmerHandler(ChannelHandler):
         self.utp.stop_hash(self.file_hash)
         self.utp.stop_hash(self.tag_hash)
         if self.file_finished == FINISHED:
+            self.file_info['public_beat']  = self.public_beat
             self.file_info['tag']  = DOWNLOAD_PATH +\
                 binascii.hexlify(self.tag_hash).decode().upper()
             self.file_info['file']  =  DOWNLOAD_PATH +\
                 binascii.hexlify(self.file_hash).decode().upper()
-            return "{'success':1}"
-        return "{'success':0}"
+            return '{"success":1}'
+        return '{"success":0}'
 
     def handler(self, hash, error):
         if error is not None:
@@ -140,33 +141,38 @@ class FarmerHeartbeatHandler(ChannelHandler):
         pass
 
     def seqAA_make_proof(self, packet):
-        if self.tag is None:
-            return None
-        rpakcet = {}
+        logging.info("making proof...")
+        rpacket = {}
         p = json.loads(packet)
-        cha = p['challenge']
+        cha = Swizzle.Swizzle.challenge_type().fromdict(p['challenge'])
         with open(self.file_info['tag'], 'rb') as file:
-            tag = Swizzle.Swizzle.tag_type().fromdict(file.read())
+            decoded = base64.b64encode(file.read()).decode('ascii')
+        tag = Swizzle.Swizzle.tag_type().fromdict(decoded)
         with open(self.file_info['file'], 'rb') as file:
-            proof = beat.prove(file, cha, tag)
-        rpacket['proof'] = proof
-        return json.dumps(rpakcet)
+            proof = self.file_info['public_beat'].prove(file, cha, tag)
+        rpacket['proof'] = proof.todict()
+        return json.dumps(rpacket)
 
     def seqAB_get_result(self, packet):
-        rpakcet = {}
+        logging.info("receiving result...")
         p = json.loads(packet)
-        if not p['valie']:
+        if not p['valid']:
+            logging.info("proof failed...")
             status = ERROR
-            
+        else:
+            logging.info("proof succeed....")
+        return None
 
 def main(destination):
-    t = StorjTelehash(-9999)
+    global telehash
+    telehash = StorjTelehash(-9999)
 
-    f = FarmerHandler(t)
-    logging.info('starting to open a farming channel at '+ t.get_my_location())
-    t.open_channel(destination, 'farming', f)
+    f = FarmerHandler()
+    logging.info('starting to open a farming channel at '+
+                 telehash.get_my_location())
+    telehash.open_channel(destination, 'farming', f)
     logging.info('starting to listen heartbeat channel')
-    t.add_channel_handler('heartbeat', f.factory)
+    telehash.add_channel_handler('heartbeat', f.factory)
 
     while status == 0:
         time.sleep(10);
