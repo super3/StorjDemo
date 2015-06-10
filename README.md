@@ -7,8 +7,8 @@ This program demonstrates:
 
 Uploader:
 
-1. listen requests to sending a file by farmer by StorjTelehash.
-2. send a file and hearbeat information when requested by Storjutp.
+1. listen requests to send a file by farmer by [StorjTelehash](https://github.com/StorjPlatform/StorjTelehash.git).
+2. send a file and hearbeat information when requested by [Storjutp](https://github.com/StorjPlatform/Storjutp.git).
 3. request and verify heartbeats periodically.
 
 Farmer:
@@ -16,6 +16,8 @@ Farmer:
 1. open a channel to request a file to a farmer by StorjTelehash.
 2. receive a file and hearbeat information by Storjutp.
 3. accept heartbeats and make proof periodically.
+
+Document is [here](https://rawgit.com/StorjPlatform/StorjDemo/master/docs/html/index.html)
 
 ## Requirements
 This requires 
