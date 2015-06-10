@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/StorjPlatform/StorjDemo.svg?branch=master)](https://travis-ci.org/StorjPlatform/StorjDemo)
 [![Coverage Status](https://coveralls.io/repos/StorjPlatform/StorjDemo/badge.svg?branch=master)](https://coveralls.io/r/StorjPlatform/StorjDemo?branch=master)
 
-# Storj Platform Trivial Demo 
+# Farming Demo on Storj Platform
 
 ## Requirements
 This requires 

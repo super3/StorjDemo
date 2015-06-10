@@ -86,4 +86,6 @@ class TestStorjDemo(object):
         u.join()
 
         assert os.path.exists(downloaded_file)
+        assert storjdemo.farmer.status == 0
+        assert storjdemo.uploader.status == 0
         assert filecmp.cmp(FILENAME, downloaded_file)
