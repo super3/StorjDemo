@@ -10,7 +10,7 @@ before_install:
   - python setup.py install
 
 script:
-  - coverage run setup.py test --include="storjdemo/*" -a "--doctest-modules --pep8 -v tests/ storjdemo/"
+  - coverage run --include="storjdemo/*" setup.py test  -a "--doctest-modules --pep8 -v tests/ storjdemo/"
 
 after_success:
   - coverage report -m --include="storjdemo/*"
