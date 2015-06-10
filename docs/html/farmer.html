@@ -1,0 +1,263 @@
+
+
+<!doctype html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>farmer module &mdash; .  documentation</title>
+    
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/bizstyle.js"></script>
+    <link rel="top" title=".  documentation" href="index.html" />
+    <link rel="next" title="uploader module" href="uploader.html" />
+    <link rel="prev" title="Welcome to .’s documentation!" href="index.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="uploader.html" title="uploader module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to .’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">.  documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to .&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="uploader.html"
+                        title="next chapter">uploader module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/farmer.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-farmer">
+<span id="farmer-module"></span><h1>farmer module<a class="headerlink" href="#module-farmer" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="farmer.FarmerHandler">
+<em class="property">class </em><code class="descclassname">farmer.</code><code class="descname">FarmerHandler</code><a class="reference internal" href="_modules/farmer.html#FarmerHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#farmer.FarmerHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">storj.messaging.ChannelHandler</span></code></p>
+<p>class for openining and handlinkg farming channel of uploader
+for farming.</p>
+<dl class="method">
+<dt id="farmer.FarmerHandler.factory">
+<code class="descname">factory</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/farmer.html#FarmerHandler.factory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#farmer.FarmerHandler.factory" title="Permalink to this definition">¶</a></dt>
+<dd><p>factory for accepting a heart beat channel.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="farmer.FarmerHandler.handler">
+<code class="descname">handler</code><span class="sig-paren">(</span><em>hash</em>, <em>error</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/farmer.html#FarmerHandler.handler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#farmer.FarmerHandler.handler" title="Permalink to this definition">¶</a></dt>
+<dd><p>handler when finishng downloading.
+check a file hash is same as one informed from uploader.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>hash</strong> (<em>byte</em>) &#8211; file hash that was finished downloading.</li>
+<li><strong>err</strong> (<em>str</em>) &#8211; error info , None if no error.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="farmer.FarmerHandler.seqAA_request">
+<code class="descname">seqAA_request</code><span class="sig-paren">(</span><em>packet</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/farmer.html#FarmerHandler.seqAA_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#farmer.FarmerHandler.seqAA_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>request a file. send a telehash location.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>packet</strong> (<em>str</em>) &#8211; recieved packet, None due to opening.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">telehash location</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="farmer.FarmerHandler.seqAB_accept_file">
+<code class="descname">seqAB_accept_file</code><span class="sig-paren">(</span><em>packet</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/farmer.html#FarmerHandler.seqAB_accept_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#farmer.FarmerHandler.seqAB_accept_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>accept a file information.
+register file hash, tag hash for heartbeat, and send acceptable 
+utp ip address and port number, and start downloading.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>packet</strong> (<em>str</em>) &#8211; recieved packet, including hash of file and 
+hash of heartbeat tag.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">json str, including utp ip address and
+utp port.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="farmer.FarmerHandler.seqAC_report_downloaded">
+<code class="descname">seqAC_report_downloaded</code><span class="sig-paren">(</span><em>packet</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/farmer.html#FarmerHandler.seqAC_report_downloaded"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#farmer.FarmerHandler.seqAC_report_downloaded" title="Permalink to this definition">¶</a></dt>
+<dd><p>wait finishing it and report of finishing it.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>packet</strong> (<em>str</em>) &#8211; recieved packet, including public beat</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">json str, only including success or not</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="farmer.FarmerHeartbeatHandler">
+<em class="property">class </em><code class="descclassname">farmer.</code><code class="descname">FarmerHeartbeatHandler</code><span class="sig-paren">(</span><em>file_info</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/farmer.html#FarmerHeartbeatHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#farmer.FarmerHeartbeatHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">storj.messaging.ChannelHandler</span></code></p>
+<p>class for accepting heartbeat channel.</p>
+<dl class="method">
+<dt id="farmer.FarmerHeartbeatHandler.seqAA_make_proof">
+<code class="descname">seqAA_make_proof</code><span class="sig-paren">(</span><em>packet</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/farmer.html#FarmerHeartbeatHandler.seqAA_make_proof"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#farmer.FarmerHeartbeatHandler.seqAA_make_proof" title="Permalink to this definition">¶</a></dt>
+<dd><p>make a proof.
+accept chanlleng, make a tag from the downloaded file, and make
+a proof.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>packet</strong> (<em>str</em>) &#8211; received json str, including challenge.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">return json str, including proof</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="farmer.FarmerHeartbeatHandler.seqAB_get_result">
+<code class="descname">seqAB_get_result</code><span class="sig-paren">(</span><em>packet</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/farmer.html#FarmerHeartbeatHandler.seqAB_get_result"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#farmer.FarmerHeartbeatHandler.seqAB_get_result" title="Permalink to this definition">¶</a></dt>
+<dd><p>receive a verification result.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>packet</strong> (<em>str</em>) &#8211; received json str, including verification result.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None to close channel.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="farmer.get_hash">
+<code class="descclassname">farmer.</code><code class="descname">get_hash</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/farmer.html#get_hash"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#farmer.get_hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>get a hash.
+:param bytes f: byte data to be hashed
+:return: hash</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="farmer.main">
+<code class="descclassname">farmer.</code><code class="descname">main</code><span class="sig-paren">(</span><em>destination</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/farmer.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#farmer.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="uploader.html" title="uploader module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to .’s documentation!"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">.  documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Author.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

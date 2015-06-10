@@ -1,0 +1,264 @@
+
+
+<!doctype html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>uploader module &mdash; .  documentation</title>
+    
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/bizstyle.js"></script>
+    <link rel="top" title=".  documentation" href="index.html" />
+    <link rel="prev" title="farmer module" href="farmer.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="farmer.html" title="farmer module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">.  documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="farmer.html"
+                        title="previous chapter">farmer module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/uploader.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-uploader">
+<span id="uploader-module"></span><h1>uploader module<a class="headerlink" href="#module-uploader" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="uploader.UploaderHandler">
+<em class="property">class </em><code class="descclassname">uploader.</code><code class="descname">UploaderHandler</code><a class="reference internal" href="_modules/uploader.html#UploaderHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uploader.UploaderHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">storj.messaging.ChannelHandler</span></code></p>
+<p>class for handling farming channel for uploader</p>
+<dl class="method">
+<dt id="uploader.UploaderHandler.handler">
+<code class="descname">handler</code><span class="sig-paren">(</span><em>hash</em>, <em>error</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uploader.html#UploaderHandler.handler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uploader.UploaderHandler.handler" title="Permalink to this definition">¶</a></dt>
+<dd><p>handler for uTP. For now do nothing.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uploader.UploaderHandler.seqAA_accept_request">
+<code class="descname">seqAA_accept_request</code><span class="sig-paren">(</span><em>packet</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uploader.html#UploaderHandler.seqAA_accept_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uploader.UploaderHandler.seqAA_accept_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>accept a file request.
+send information about a hash of a file and a hearbeat tag,
+and public beat.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>packet</strong> (<em>str</em>) &#8211; received json packet, including 
+telehash location.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">sending json packet, including hash of file and heartbeat
+and tag to be sent.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="uploader.UploaderHandler.seqAB_send_file">
+<code class="descname">seqAB_send_file</code><span class="sig-paren">(</span><em>packet</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uploader.html#UploaderHandler.seqAB_send_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uploader.UploaderHandler.seqAB_send_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>send a file.
+send a file and a hearbeat tag,</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>packet</strong> (<em>str</em>) &#8211; received json packet, including 
+utp ip address and port number.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">sending json packet, including public heartbeat.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="uploader.UploaderHandler.seqAC_first_heartbeat">
+<code class="descname">seqAC_first_heartbeat</code><span class="sig-paren">(</span><em>packet</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uploader.html#UploaderHandler.seqAC_first_heartbeat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uploader.UploaderHandler.seqAC_first_heartbeat" title="Permalink to this definition">¶</a></dt>
+<dd><p>accept a file downloaded report and prepare a haertbeat in a thread.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>packet</strong> (<em>str</em>) &#8211; received json packet, including 
+success flag..</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">sending json packet, None to close the channel.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="uploader.UploaderHeartbeatHandler">
+<em class="property">class </em><code class="descclassname">uploader.</code><code class="descname">UploaderHeartbeatHandler</code><span class="sig-paren">(</span><em>state</em>, <em>destination</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uploader.html#UploaderHeartbeatHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uploader.UploaderHeartbeatHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">storj.messaging.ChannelHandler</span></code></p>
+<p>class for sending heartbeat channel.</p>
+<dl class="classmethod">
+<dt id="uploader.UploaderHeartbeatHandler.schedule_heartbeat">
+<em class="property">classmethod </em><code class="descname">schedule_heartbeat</code><span class="sig-paren">(</span><em>sl</em>, <em>state</em>, <em>destination</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uploader.html#UploaderHeartbeatHandler.schedule_heartbeat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uploader.UploaderHeartbeatHandler.schedule_heartbeat" title="Permalink to this definition">¶</a></dt>
+<dd><p>schedule a heartbeat in a thread.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>s1</strong> (<em>int</em>) &#8211; wait time before starting heartbeat.</li>
+<li><strong>state</strong> (<em>object</em>) &#8211; heartbeat state</li>
+<li><strong>destination</strong> (<em>str</em>) &#8211; telehash destination</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="uploader.UploaderHeartbeatHandler.seqAA_send_challenge">
+<code class="descname">seqAA_send_challenge</code><span class="sig-paren">(</span><em>packet</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uploader.html#UploaderHeartbeatHandler.seqAA_send_challenge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uploader.UploaderHeartbeatHandler.seqAA_send_challenge" title="Permalink to this definition">¶</a></dt>
+<dd><p>make and send a challenge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>packet</strong> (<em>str</em>) &#8211; None</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">sending json packet, including challenge of heartbeat.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="uploader.UploaderHeartbeatHandler.seqAB_verify">
+<code class="descname">seqAB_verify</code><span class="sig-paren">(</span><em>packet</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uploader.html#UploaderHeartbeatHandler.seqAB_verify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uploader.UploaderHeartbeatHandler.seqAB_verify" title="Permalink to this definition">¶</a></dt>
+<dd><p>verify a proof.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>packet</strong> (<em>str</em>) &#8211; received json packet, including 
+proof of heartbeat.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">sending json packet, including a result of verification.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="uploader.get_hash">
+<code class="descclassname">uploader.</code><code class="descname">get_hash</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uploader.html#get_hash"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uploader.get_hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>get a hash.
+:param bytes f: byte data to be hashed
+:return: hash</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="uploader.main">
+<code class="descclassname">uploader.</code><code class="descname">main</code><span class="sig-paren">(</span><em>port</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uploader.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uploader.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="uploader.prepare_heartbeat">
+<code class="descclassname">uploader.</code><code class="descname">prepare_heartbeat</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uploader.html#prepare_heartbeat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uploader.prepare_heartbeat" title="Permalink to this definition">¶</a></dt>
+<dd><p>prepare heartbeat.
+encode a file , save tag to a file named by tag hash,
+and return state and a hash of tag.
+:param str filename: heartbeat target filename 
+:return: state and a hash of tag</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="farmer.html" title="farmer module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">.  documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Author.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

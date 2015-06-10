@@ -6,9 +6,13 @@
 ## Requirements
 This requires 
 * `g++` (v4.8 or higher for test)
-* `python` (2.x or 3.x)
+* `python` (2.7.x ,3.3.x, or 3.4.x)
 
 ## Installation
+
+To install it,
+
+    $ python setup.py install
 
 To run the associated tests.
 

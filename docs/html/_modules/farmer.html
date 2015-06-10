@@ -1,0 +1,354 @@
+
+
+<!doctype html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>farmer &mdash; .  documentation</title>
+    
+    <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/bizstyle.js"></script>
+    <link rel="top" title=".  documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">.  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for farmer</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+
+<span class="c"># Copyright (c) 2015, Shinya Yagyu</span>
+<span class="c"># All rights reserved.</span>
+<span class="c">#</span>
+<span class="c"># Redistribution and use in source and binary forms, with or without</span>
+<span class="c"># modification, are permitted provided that the following conditions are met:</span>
+<span class="c">#</span>
+<span class="c"># 1. Redistributions of source code must retain the above copyright notice,</span>
+<span class="c">#    this list of conditions and the following disclaimer.</span>
+<span class="c"># 2. Redistributions in binary form must reproduce the above copyright notice,</span>
+<span class="c">#    this list of conditions and the following disclaimer in the documentation</span>
+<span class="c">#    and/or other materials provided with the distribution.</span>
+<span class="c"># 3. Neither the name of the copyright holder nor the names of its contributors</span>
+<span class="c">#    may be used to endorse or promote products derived from this software</span>
+<span class="c">#    without specific prior written permission.</span>
+<span class="c">#</span>
+<span class="c"># THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;</span>
+<span class="c"># AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</span>
+<span class="c"># IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</span>
+<span class="c"># ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE</span>
+<span class="c"># LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR</span>
+<span class="c"># CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF</span>
+<span class="c"># SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS</span>
+<span class="c"># INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN</span>
+<span class="c"># CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)</span>
+<span class="c"># ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</span>
+<span class="c"># POSSIBILITY OF SUCH DAMAGE.</span>
+
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">base64</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">hashlib</span>  <span class="c"># For SHA-256 Encoding</span>
+<span class="kn">import</span> <span class="nn">binascii</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+
+<span class="kn">from</span> <span class="nn">heartbeat</span> <span class="kn">import</span> <span class="n">Swizzle</span>
+<span class="kn">from</span> <span class="nn">storj.messaging</span> <span class="kn">import</span> <span class="n">ChannelHandler</span>
+<span class="kn">from</span> <span class="nn">storj.messaging</span> <span class="kn">import</span> <span class="n">StorjTelehash</span>
+<span class="kn">from</span> <span class="nn">storjutp.storjutp</span> <span class="kn">import</span> <span class="n">Storjutp</span>
+
+<span class="n">log_fmt</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%(filename)s</span><span class="s">:</span><span class="si">%(lineno)d</span><span class="s"> </span><span class="si">%(funcName)s</span><span class="s">() </span><span class="si">%(message)s</span><span class="s">&#39;</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="n">log_fmt</span><span class="p">)</span>
+
+<span class="n">ERROR</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+<span class="n">FINISHED</span> <span class="o">=</span> <span class="mi">99</span>
+<span class="c"># Never be &#39;.&#39; if farmer.py and uploader.py run simultaneously.</span>
+<span class="n">DOWNLOAD_PATH</span> <span class="o">=</span> <span class="s">&#39;./download/&#39;</span>
+<span class="n">telehash</span> <span class="o">=</span> <span class="bp">None</span>
+<span class="n">status</span> <span class="o">=</span> <span class="mi">0</span>
+
+
+<div class="viewcode-block" id="get_hash"><a class="viewcode-back" href="../farmer.html#farmer.get_hash">[docs]</a><span class="k">def</span> <span class="nf">get_hash</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    get a hash.</span>
+<span class="sd">    :param bytes f: byte data to be hashed</span>
+<span class="sd">    :return: hash</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">()</span>
+    <span class="n">m</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="n">sha</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">digest</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">sha</span>
+
+</div>
+<div class="viewcode-block" id="FarmerHandler"><a class="viewcode-back" href="../farmer.html#farmer.FarmerHandler">[docs]</a><span class="k">class</span> <span class="nc">FarmerHandler</span><span class="p">(</span><span class="n">ChannelHandler</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    class for openining and handlinkg farming channel of uploader</span>
+<span class="sd">    for farming.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        init</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ChannelHandler</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_info</span> <span class="o">=</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="FarmerHandler.seqAA_request"><a class="viewcode-back" href="../farmer.html#farmer.FarmerHandler.seqAA_request">[docs]</a>    <span class="k">def</span> <span class="nf">seqAA_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        request a file. send a telehash location.</span>
+
+<span class="sd">        :param str packet: recieved packet, None due to opening.</span>
+<span class="sd">        :return: telehash location</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">global</span> <span class="n">telehash</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;requesting a file...&quot;</span><span class="p">)</span>
+        <span class="n">rpacket</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">rpacket</span><span class="p">[</span><span class="s">&#39;telehash_location&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">telehash</span><span class="o">.</span><span class="n">get_my_location</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">rpacket</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FarmerHandler.seqAB_accept_file"><a class="viewcode-back" href="../farmer.html#farmer.FarmerHandler.seqAB_accept_file">[docs]</a>    <span class="k">def</span> <span class="nf">seqAB_accept_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        accept a file information.</span>
+<span class="sd">        register file hash, tag hash for heartbeat, and send acceptable </span>
+<span class="sd">        utp ip address and port number, and start downloading.</span>
+
+<span class="sd">        :param str packet: recieved packet, including hash of file and </span>
+<span class="sd">                           hash of heartbeat tag.</span>
+<span class="sd">        :return: json str, including utp ip address and</span>
+<span class="sd">                  utp port. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;accepting file hashes...&quot;</span><span class="p">)</span>
+        <span class="n">rpacket</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">p</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_finished</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_hash</span> <span class="o">=</span> <span class="n">binascii</span><span class="o">.</span><span class="n">unhexlify</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s">&#39;file_hash&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tag_hash</span> <span class="o">=</span> <span class="n">binascii</span><span class="o">.</span><span class="n">unhexlify</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s">&#39;tag_hash&#39;</span><span class="p">])</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;accepting file </span><span class="si">%s</span><span class="s"> and tag_hash </span><span class="si">%s</span><span class="s">&#39;</span>
+                     <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_hash</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag_hash</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">utp</span> <span class="o">=</span> <span class="n">Storjutp</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">utp</span><span class="o">.</span><span class="n">regist_hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_hash</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">handler</span><span class="p">,</span> <span class="n">DOWNLOAD_PATH</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">utp</span><span class="o">.</span><span class="n">regist_hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tag_hash</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">handler</span><span class="p">,</span> <span class="n">DOWNLOAD_PATH</span><span class="p">)</span>
+        <span class="n">loc</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">telehash</span><span class="o">.</span><span class="n">get_my_location</span><span class="p">())</span>
+        <span class="n">rpacket</span><span class="p">[</span><span class="s">&#39;utp_ip&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">loc</span><span class="p">[</span><span class="s">&#39;paths&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s">&#39;ip&#39;</span><span class="p">]</span>
+        <span class="n">rpacket</span><span class="p">[</span><span class="s">&#39;utp_port&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">utp</span><span class="o">.</span><span class="n">get_serverport</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">rpacket</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FarmerHandler.seqAC_report_downloaded"><a class="viewcode-back" href="../farmer.html#farmer.FarmerHandler.seqAC_report_downloaded">[docs]</a>    <span class="k">def</span> <span class="nf">seqAC_report_downloaded</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        wait finishing it and report of finishing it.</span>
+
+<span class="sd">        :param str packet: recieved packet, including public beat </span>
+<span class="sd">        :return: json str, only including success or not</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;reoprt that downloaded a file...&quot;</span><span class="p">)</span>
+        <span class="n">rpacket</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+        <span class="n">public_beat</span> <span class="o">=</span> <span class="n">Swizzle</span><span class="o">.</span><span class="n">Swizzle</span><span class="o">.</span><span class="n">fromdict</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s">&#39;public_beat&#39;</span><span class="p">])</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_finished</span> <span class="o">!=</span> <span class="n">FINISHED</span> <span class="ow">and</span>\
+                <span class="bp">self</span><span class="o">.</span><span class="n">file_finished</span> <span class="o">!=</span> <span class="n">ERROR</span><span class="p">:</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;finished downloading...&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">utp</span><span class="o">.</span><span class="n">stop_hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_hash</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">utp</span><span class="o">.</span><span class="n">stop_hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tag_hash</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_finished</span> <span class="o">==</span> <span class="n">FINISHED</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_info</span><span class="p">[</span><span class="s">&#39;public_beat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">public_beat</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_info</span><span class="p">[</span><span class="s">&#39;tag&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">DOWNLOAD_PATH</span> <span class="o">+</span>\
+                <span class="n">binascii</span><span class="o">.</span><span class="n">hexlify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tag_hash</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_info</span><span class="p">[</span><span class="s">&#39;file&#39;</span><span class="p">]</span>  <span class="o">=</span>  <span class="n">DOWNLOAD_PATH</span> <span class="o">+</span>\
+                <span class="n">binascii</span><span class="o">.</span><span class="n">hexlify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_hash</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="k">return</span> <span class="s">&#39;{&quot;success&quot;:1}&#39;</span>
+        <span class="k">return</span> <span class="s">&#39;{&quot;success&quot;:0}&#39;</span>
+</div>
+<div class="viewcode-block" id="FarmerHandler.handler"><a class="viewcode-back" href="../farmer.html#farmer.FarmerHandler.handler">[docs]</a>    <span class="k">def</span> <span class="nf">handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">hash</span><span class="p">,</span> <span class="n">error</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        handler when finishng downloading.</span>
+<span class="sd">        check a file hash is same as one informed from uploader.</span>
+
+<span class="sd">        :param byte hash: file hash that was finished downloading.</span>
+<span class="sd">        :param str err: error info , None if no error.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">error</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;downloaded failed...&quot;</span> <span class="o">+</span> <span class="n">error</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="n">DOWNLOAD_PATH</span> <span class="o">+</span> <span class="n">binascii</span><span class="o">.</span><span class="n">hexlify</span><span class="p">(</span><span class="nb">hash</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">b</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                <span class="n">hash_</span> <span class="o">=</span> <span class="n">get_hash</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">hash_</span> <span class="o">!=</span> <span class="nb">hash</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;downloaded file is corrupted...&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">file_finished</span> <span class="o">=</span> <span class="n">ERROR</span>
+                <span class="k">return</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_finished</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_finished</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_finished</span> <span class="o">=</span> <span class="n">FINISHED</span>
+</div>
+<div class="viewcode-block" id="FarmerHandler.factory"><a class="viewcode-back" href="../farmer.html#farmer.FarmerHandler.factory">[docs]</a>    <span class="k">def</span> <span class="nf">factory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        factory for accepting a heart beat channel.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_info</span> <span class="o">!=</span> <span class="p">{}:</span>
+            <span class="k">return</span> <span class="n">FarmerHeartbeatHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_info</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+</div></div>
+<div class="viewcode-block" id="FarmerHeartbeatHandler"><a class="viewcode-back" href="../farmer.html#farmer.FarmerHeartbeatHandler">[docs]</a><span class="k">class</span> <span class="nc">FarmerHeartbeatHandler</span><span class="p">(</span><span class="n">ChannelHandler</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    class for accepting heartbeat channel.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_info</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        init</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ChannelHandler</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_info</span> <span class="o">=</span> <span class="n">file_info</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="FarmerHeartbeatHandler.seqAA_make_proof"><a class="viewcode-back" href="../farmer.html#farmer.FarmerHeartbeatHandler.seqAA_make_proof">[docs]</a>    <span class="k">def</span> <span class="nf">seqAA_make_proof</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        make a proof.</span>
+<span class="sd">        accept chanlleng, make a tag from the downloaded file, and make</span>
+<span class="sd">        a proof.</span>
+
+<span class="sd">        :param str packet: received json str, including challenge.</span>
+<span class="sd">        :return: return json str, including proof</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;making proof...&quot;</span><span class="p">)</span>
+        <span class="n">rpacket</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+        <span class="n">cha</span> <span class="o">=</span> <span class="n">Swizzle</span><span class="o">.</span><span class="n">Swizzle</span><span class="o">.</span><span class="n">challenge_type</span><span class="p">()</span><span class="o">.</span><span class="n">fromdict</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s">&#39;challenge&#39;</span><span class="p">])</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_info</span><span class="p">[</span><span class="s">&#39;tag&#39;</span><span class="p">],</span> <span class="s">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="nb">file</span><span class="p">:</span>
+            <span class="n">decoded</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="nb">file</span><span class="o">.</span><span class="n">read</span><span class="p">())</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s">&#39;ascii&#39;</span><span class="p">)</span>
+        <span class="n">tag</span> <span class="o">=</span> <span class="n">Swizzle</span><span class="o">.</span><span class="n">Swizzle</span><span class="o">.</span><span class="n">tag_type</span><span class="p">()</span><span class="o">.</span><span class="n">fromdict</span><span class="p">(</span><span class="n">decoded</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_info</span><span class="p">[</span><span class="s">&#39;file&#39;</span><span class="p">],</span> <span class="s">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="nb">file</span><span class="p">:</span>
+            <span class="n">proof</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_info</span><span class="p">[</span><span class="s">&#39;public_beat&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">prove</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="n">cha</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
+        <span class="n">rpacket</span><span class="p">[</span><span class="s">&#39;proof&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">proof</span><span class="o">.</span><span class="n">todict</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">rpacket</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="FarmerHeartbeatHandler.seqAB_get_result"><a class="viewcode-back" href="../farmer.html#farmer.FarmerHeartbeatHandler.seqAB_get_result">[docs]</a>    <span class="k">def</span> <span class="nf">seqAB_get_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        receive a verification result.</span>
+
+<span class="sd">        :param str packet: received json str, including verification result.</span>
+<span class="sd">        :return: None to close channel.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;receiving result...&quot;</span><span class="p">)</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">p</span><span class="p">[</span><span class="s">&#39;valid&#39;</span><span class="p">]:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;proof failed...&quot;</span><span class="p">)</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="n">ERROR</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;proof succeed....&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+</div></div>
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../farmer.html#farmer.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">destination</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">telehash</span>
+    <span class="n">telehash</span> <span class="o">=</span> <span class="n">StorjTelehash</span><span class="p">(</span><span class="o">-</span><span class="mi">9999</span><span class="p">)</span>
+
+    <span class="n">f</span> <span class="o">=</span> <span class="n">FarmerHandler</span><span class="p">()</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;starting to open a farming channel at &#39;</span> <span class="o">+</span>
+                 <span class="n">telehash</span><span class="o">.</span><span class="n">get_my_location</span><span class="p">())</span>
+    <span class="n">telehash</span><span class="o">.</span><span class="n">open_channel</span><span class="p">(</span><span class="n">destination</span><span class="p">,</span> <span class="s">&#39;farming&#39;</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;starting to listen heartbeat channel&#39;</span><span class="p">)</span>
+    <span class="n">telehash</span><span class="o">.</span><span class="n">add_channel_handler</span><span class="p">(</span><span class="s">&#39;heartbeat&#39;</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">factory</span><span class="p">)</span>
+
+    <span class="k">while</span> <span class="n">status</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">status</span> <span class="o">==</span> <span class="n">ERROR</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;something wrong&quot;</span><span class="p">)</span>
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">DOWNLOAD_PATH</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">DOWNLOAD_PATH</span><span class="p">)</span>
+    <span class="n">main</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">.  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Author.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

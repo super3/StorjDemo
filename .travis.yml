@@ -13,7 +13,6 @@ before_install:
   - sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-4.8 90
   - pip install coverage coveralls
   - python setup.py install
-  - echo '{"hashname":"hgpcqahkrfo3u7zwwfyvr6gyfphw2xes2vryo7up2fwtekjkag6a","keys":{"1a":"apqnpze5tlbpdrafud3e4onjxdwar2t6oi"},"secrets":{"1a":"3stkh7snnk7hkcxnkoe2g2ax66ik4tr3"}}' > id.json
 
 script:
   - coverage run setup.py test -a "--doctest-modules --pep8 -v tests/ storjdemo/"
