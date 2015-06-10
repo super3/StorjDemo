@@ -1,16 +1,11 @@
-language: python
-python:
-  - '2.7'
-  - '3.3'
-  - '3.4'
+language: objective-c
 
 before_install:
-  - sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
-  - sudo apt-get -qq update
-  - sudo apt-get -qq install g++-4.8
-  - sudo apt-get install libcrypto++-dev
-  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 90
-  - sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-4.8 90
+  - brew update
+  - brew install openssl
+  - brew install cryptopp
+  - brew install python
+  - brew install python3
   - pip install coverage coveralls
   - python setup.py install
 
