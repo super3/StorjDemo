@@ -64,8 +64,10 @@ under libs category:
 
 And you must install crypto++ by
 
-1. git clone https://github.com/cawka/cryptopp-cygwin.git
-2. make install
+    $ git clone https://github.com/cawka/cryptopp-cygwin.git
+    $ cd cryptopp-cygwin
+    $ make
+    $ make install
 
 After that run c:\cygwin\cygwin.bat and follow the installation section.
 
