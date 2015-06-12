@@ -28,6 +28,11 @@ This requires
 Before installation, if you didn't install crypto++,
 
     $sudo apt-get install libcrypto++-dev libgmp-dev
+    
+Download the repo,
+
+    git clone https://github.com/StorjPlatform/StorjDemo
+    cd StorjDemo
 
 To install the program,
 
@@ -35,6 +40,7 @@ To install the program,
 
 To run the associated tests.
 
+    $ apt-get install python-pytest
     $ PYTHONPATH=. py.test -q tests/test.py -s
 
 ### For Windows OS
